@@ -8,7 +8,8 @@ import {
   ElementRef,
   AfterViewInit,
   ContentChildren,
-  QueryList
+  QueryList,
+  TemplateRef
 } from '@angular/core';
 
 @Component({
@@ -16,17 +17,10 @@ import {
   template: '<ng-content></ng-content>',
 })
 export class NavigationPageComponent implements AfterViewInit {
-  @ContentChild('content', { read: ViewRef })
-  contentViewRef: ViewRef;
-  @ContentChild('content', { read: ViewContainerRef })
-  contentViewContainerRef: ViewContainerRef;
-  @ContentChild('content')
-  contentComponent: any;
+  @ContentChild(TemplateRef)
+  template: TemplateRef<{}>;
 
   ngAfterViewInit(): void {
-    console.log('contentViewRef', this.contentViewRef);
-    console.log('contentViewContainerRef', this.contentViewContainerRef);
-    console.log('contentComponent', this.contentComponent);
   }
 }
 
@@ -37,11 +31,7 @@ export class NavigationPageComponent implements AfterViewInit {
 })
 export class NavigationComponent implements OnInit, AfterViewInit {
   @ContentChildren(NavigationPageComponent)
-  pages: QueryList<NavigationPageComponent>;
-  @ViewChild('display')
-  displayElementRef: ElementRef;
-  @ViewChild('display', { read: ViewContainerRef })
-  displayViewContainerRef: ViewContainerRef;
+  pageComponents: QueryList<NavigationPageComponent>;
 
   index = 0;
 
@@ -51,20 +41,45 @@ export class NavigationComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    console.log('displayElementRef', this.displayElementRef);
-    console.log('displayViewContainerRef', this.displayViewContainerRef);
-    this.updatePage();
   }
 
   prevPage() {
-    this.index -= 1;
+    if (this.prevOk) {
+      this.index -= 1;
+    }
   }
 
   nextPage() {
-    this.index += 1;
+    if (this.nextOk) {
+      this.index += 1;
+    }
   }
 
-  updatePage() {
-    this.displayViewContainerRef.insert(this.pages.toArray()[this.index].contentComponent);
+  get pages() {
+    return this.pageComponents.toArray();
+  }
+
+  get maxPageIndex() {
+    return this.pageComponents.length - 1;
+  }
+
+  get currentPage() {
+    return this.pages[this.index];
+  }
+
+  get currentPageTemplate() {
+    return this.currentPage.template;
+  }
+
+  get pageIndices() {
+    return Array.from({ length: this.pages.length }, (v, k) => k + 1)
+  }
+
+  get prevOk() {
+    return this.index > 0;
+  }
+
+  get nextOk() {
+    return this.index < this.maxPageIndex;
   }
 }

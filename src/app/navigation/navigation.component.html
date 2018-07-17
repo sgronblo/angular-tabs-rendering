@@ -1,4 +1,6 @@
-<div #display></div>
+<span *ngFor='let i of pageIndices'>{{i}}</span>
 
-<button (click)='prevPage()'>Prev</button>
-<button (click)='nextPage()'>Next</button>
+<ng-container [ngTemplateOutlet]='currentPageTemplate'ngTemplateOutlet></ng-container>
+
+<button (click)='prevPage()' [disabled]='!prevOk'>Prev</button>
+<button (click)='nextPage()' [disabled]='!nextOk'>Next</button>
